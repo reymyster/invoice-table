@@ -2,6 +2,19 @@
 
 import { useState, ChangeEvent } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { Minus } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type LineItem, useLineItems, formatCurrency } from "./data";
 
@@ -14,8 +27,40 @@ export function useColumns(): ColumnDef<LineItem>[] {
   const setName = useLineItems((s) => s.setName);
   const setQuantity = useLineItems((s) => s.setQuantity);
   const setUnitPrice = useLineItems((s) => s.setUnitPrice);
+  const deleteItem = useLineItems((s) => s.delete);
 
   return [
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="destructive" size="icon">
+              <Minus className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete line item {row.original.name}?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Please confirm you wish to remove this line item.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteItem({ id: row.original.id })}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ),
+    },
     {
       accessorKey: "name",
       header: "Description",
