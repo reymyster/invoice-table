@@ -3,7 +3,7 @@
 import { Table } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLineItems } from "./data";
+import { useLineItems, useLineItemsFromURL } from "./data";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -12,7 +12,8 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const addLine = useLineItems((s) => s.addLine);
+  // const addLine = useLineItems((s) => s.addLine);
+  const { addLine } = useLineItemsFromURL();
 
   return (
     <div className="flex justify-end">

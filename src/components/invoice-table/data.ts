@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { ulid } from "ulidx";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+
 export type LineItem = {
   id: string;
   name: string;
@@ -34,6 +37,103 @@ const data: LineItem[] = JSON.parse(
 );
 
 data.forEach((d) => (d.total_price = d.quantity * d.unit_price));
+
+export function useLineItemsFromURL() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams()!;
+
+  let lines = (() => {
+    let parsedSuccessfully = true;
+    let tmp: LineItem[] | undefined;
+
+    if (searchParams.has("b") && searchParams.get("b")) {
+      try {
+        tmp = JSON.parse(searchParams.get("b") ?? "");
+      } catch (err) {
+        parsedSuccessfully = false;
+        console.error(err);
+      }
+    }
+
+    return tmp ?? data;
+  })();
+
+  const set = useCallback(
+    (items: LineItem[]) => {
+      const params = new URLSearchParams(searchParams);
+      const str = JSON.stringify(items);
+      console.log({ encodedLength: str.length });
+      params.set("b", str);
+
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [searchParams, pathname, router],
+  );
+
+  const addLine = useCallback(() => {
+    lines.push({
+      id: ulid(),
+      name: "",
+      quantity: 0,
+      unit_price: 0,
+      total_price: 0,
+    });
+    set(lines);
+  }, [set, lines]);
+
+  const setQuantity = useCallback(
+    ({ id, quantity }: { id: string; quantity: number }) => {
+      var line = lines.find((l) => l.id === id);
+      if (line) {
+        line.quantity = quantity;
+        line.total_price = quantity * line.unit_price;
+        set(lines);
+      }
+    },
+    [set, lines],
+  );
+
+  const setUnitPrice = useCallback(
+    ({ id, unit_price }: { id: string; unit_price: number }) => {
+      var line = lines.find((l) => l.id === id);
+      if (line) {
+        line.unit_price = unit_price;
+        line.total_price = line.quantity * unit_price;
+        set(lines);
+      }
+    },
+    [set, lines],
+  );
+
+  const setName = useCallback(
+    ({ id, name }: { id: string; name: string }) => {
+      var line = lines.find((l) => l.id === id);
+      if (line) {
+        line.name = name;
+        set(lines);
+      }
+    },
+    [set, lines],
+  );
+
+  const deleteItem = useCallback(
+    ({ id }: { id: string }) => {
+      const filtered = lines.filter((l) => l.id !== id);
+      set(filtered);
+    },
+    [set, lines],
+  );
+
+  return {
+    data: lines,
+    addLine,
+    setQuantity,
+    setUnitPrice,
+    setName,
+    deleteItem,
+  };
+}
 
 export const useLineItems = create<State & Action>((set) => ({
   lines: data,

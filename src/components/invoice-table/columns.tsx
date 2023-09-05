@@ -16,7 +16,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { type LineItem, useLineItems, formatCurrency } from "./data";
+import {
+  type LineItem,
+  useLineItems,
+  formatCurrency,
+  useLineItemsFromURL,
+} from "./data";
 
 function toNumberOrZero(value: string): number {
   const n = Number(value);
@@ -56,7 +61,11 @@ interface CellProps {
 }
 
 function NameCell({ row }: CellProps) {
-  const setName = useLineItems((s) => s.setName);
+  return <NameCellInner key={`${row.original.id}_name`} row={row} />;
+}
+
+function NameCellInner({ row }: CellProps) {
+  const { setName } = useLineItemsFromURL();
   const [value, setValue] = useState(row.original.name);
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
     setValue(e.target.value);
@@ -74,7 +83,12 @@ function NameCell({ row }: CellProps) {
 }
 
 function QuantityCell({ row }: CellProps) {
-  const setQuantity = useLineItems((s) => s.setQuantity);
+  return <QuantityCellInner key={`${row.original.id}_quantity`} row={row} />;
+}
+
+function QuantityCellInner({ row }: CellProps) {
+  // const setQuantity = useLineItems((s) => s.setQuantity);
+  const { setQuantity } = useLineItemsFromURL();
   const [value, setValue] = useState(row.original.quantity.toString());
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
     setValue(e.target.value);
@@ -95,7 +109,12 @@ function QuantityCell({ row }: CellProps) {
 }
 
 function UnitPriceCell({ row }: CellProps) {
-  const setUnitPrice = useLineItems((s) => s.setUnitPrice);
+  return <UnitPriceCellInner key={`${row.original.id}_unit_price`} row={row} />;
+}
+
+function UnitPriceCellInner({ row }: CellProps) {
+  // const setUnitPrice = useLineItems((s) => s.setUnitPrice);
+  const { setUnitPrice } = useLineItemsFromURL();
   const [value, setValue] = useState(row.original.unit_price.toString());
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
     setValue(e.target.value);
@@ -125,7 +144,8 @@ function TotalPriceCell({ row }: CellProps) {
 }
 
 function ActionCell({ row }: CellProps) {
-  const deleteItem = useLineItems((s) => s.delete);
+  // const deleteItem = useLineItems((s) => s.delete);
+  const { deleteItem } = useLineItemsFromURL();
 
   return (
     <AlertDialog>
